@@ -15,6 +15,7 @@ import {
   ProgressJsonString,
 } from './domain'
 import { Message, type ShareOutcome } from './message'
+import { activateWaitingUpdate } from './serviceWorker'
 
 export const PROGRESS_STORAGE_KEY = 'origin:v1'
 
@@ -109,6 +110,13 @@ export const ShareResult = Command.define('ShareResult', {
         onSuccess: outcome => Message.CompletedShareResult({ outcome }),
       }),
     ),
+})
+
+export const ActivateUpdate = Command.define('ActivateUpdate', {
+  messages: [Message.CompletedActivateUpdate],
+  execute: activateWaitingUpdate.pipe(
+    Effect.as(Message.CompletedActivateUpdate()),
+  ),
 })
 
 export const NavigateInternal = Command.define('NavigateInternal', {

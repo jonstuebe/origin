@@ -60,6 +60,15 @@ export const ProgressJsonString = Schema.fromJsonString(
   Schema.toCodecJson(Progress),
 )
 
+/** Whether a newer version of the site is waiting to take over. */
+export const AppUpdate = defineTaggedUnion({
+  Current: {},
+  Available: {},
+  Dismissed: {},
+  Applying: {},
+})
+export type AppUpdate = typeof AppUpdate.Type
+
 export const emptyProgress: Progress = { days: {} }
 
 const untouchedDay: DayProgress = {

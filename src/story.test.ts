@@ -4,13 +4,20 @@ import { fromString } from 'foldkit/url'
 import { describe, expect, test } from 'vitest'
 
 import {
+  ActivateUpdate,
   FetchArchive,
   FetchFact,
   SaveProgress,
   ScrollToTop,
   ShareResult,
 } from './command'
-import { FactAsyncData, FetchError, dayProgress, emptyProgress } from './domain'
+import {
+  AppUpdate,
+  FactAsyncData,
+  FetchError,
+  dayProgress,
+  emptyProgress,
+} from './domain'
 import { Message, init, update } from './main'
 import {
   archiveOnNov6,
@@ -219,6 +226,41 @@ describe('navigation', () => {
         expect(dayProgress(model.progress, 1).isRevealed).toBe(false)
       }),
       Command.resolve(SaveProgress, Message.CompletedSaveProgress()),
+    )
+  })
+})
+
+describe('app updates', () => {
+  test('a waiting update is offered, and reloading activates it', () => {
+    story(
+      update,
+      given(modelWith()),
+      message(Message.FoundAppUpdate()),
+      model(model => {
+        expect(model.appUpdate).toEqual(AppUpdate.Available())
+      }),
+      message(Message.ClickedReloadForUpdate()),
+      model(model => {
+        expect(model.appUpdate).toEqual(AppUpdate.Applying())
+      }),
+      Command.expectExact(ActivateUpdate()),
+      Command.resolve(ActivateUpdate, Message.CompletedActivateUpdate()),
+    )
+  })
+
+  test('“Later” hides the toast until another update arrives', () => {
+    story(
+      update,
+      given(modelWith({ appUpdate: AppUpdate.Available() })),
+      message(Message.ClickedDismissUpdate()),
+      Command.expectNone(),
+      model(model => {
+        expect(model.appUpdate).toEqual(AppUpdate.Dismissed())
+      }),
+      message(Message.FoundAppUpdate()),
+      model(model => {
+        expect(model.appUpdate).toEqual(AppUpdate.Available())
+      }),
     )
   })
 })

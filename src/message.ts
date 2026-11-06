@@ -32,5 +32,9 @@ export const Message = defineMessageUnion({
   FailedFetchArchive: { number: Schema.Number, error: FetchError },
   CompletedSaveProgress: {},
   CompletedShareResult: { outcome: ShareOutcome },
+  FoundAppUpdate: {},
+  ClickedReloadForUpdate: {},
+  ClickedDismissUpdate: {},
+  CompletedActivateUpdate: {},
 })
 export type Message = typeof Message.Type

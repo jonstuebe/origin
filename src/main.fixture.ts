@@ -2,6 +2,7 @@ import { Option } from 'effect'
 
 import { type ClockReading } from './clock'
 import {
+  AppUpdate,
   type Archive,
   ArchiveAsyncData,
   type Fact,
@@ -46,6 +47,7 @@ export const modelWith = (
     pastFact: typeof FactAsyncData.schema.Type
     archive: typeof ArchiveAsyncData.schema.Type
     progress: Progress
+    appUpdate: AppUpdate
   }> = {},
 ): Model =>
   Model.make({
@@ -56,4 +58,5 @@ export const modelWith = (
     archive: overrides.archive ?? ArchiveAsyncData.Idle(),
     progress: overrides.progress ?? emptyProgress,
     maybeShareOutcome: Option.none(),
+    appUpdate: overrides.appUpdate ?? AppUpdate.Current(),
   })

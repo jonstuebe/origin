@@ -8,6 +8,7 @@ import { BrowserKeyValueStore } from '@effect/platform-browser'
 import { ClockReading, readClock } from './clock'
 import { PROGRESS_STORAGE_KEY } from './command'
 import {
+  AppUpdate,
   ArchiveAsyncData,
   FactAsyncData,
   Progress,
@@ -64,4 +65,5 @@ export const init: Runtime.RoutingApplicationInit<Model, Message, Flags> = (
     archive: ArchiveAsyncData.Idle(),
     progress: flags.progress,
     maybeShareOutcome: Option.none(),
+    appUpdate: AppUpdate.Current(),
   })

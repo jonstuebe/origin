@@ -4,6 +4,7 @@ import { AsyncData } from 'foldkit'
 import { Document, Html, HtmlBuilder } from 'foldkit/html'
 
 import {
+  AppUpdate,
   type ArchiveEntry,
   type DayProgress,
   type Fact,
@@ -366,8 +367,6 @@ const archivePageView = (model: Model, h: H): Html =>
     ],
   )
 
-// DOCUMENT
-
 const notFoundView = (h: H): Html =>
   messageView(
     'Nothing here.',
@@ -376,42 +375,102 @@ const notFoundView = (h: H): Html =>
     h,
   )
 
+// UPDATE TOAST
+
+const updateToastView = (model: Model, h: H): Html =>
+  h.div(
+    [h.Class('update-slot'), h.Role('status'), h.AriaLive('polite')],
+    [
+      AppUpdate.match(model.appUpdate, {
+        Current: () => h.empty,
+        Dismissed: () => h.empty,
+        Available: () =>
+          h.div(
+            [h.Class('update-toast')],
+            [
+              h.span(
+                [h.Class('update-text')],
+                ['A new version of Origin is ready.'],
+              ),
+              h.span(
+                [h.Class('update-actions')],
+                [
+                  h.button(
+                    [
+                      h.Type('button'),
+                      h.Class('link'),
+                      h.OnClick(Message.ClickedReloadForUpdate()),
+                    ],
+                    ['Reload'],
+                  ),
+                  h.button(
+                    [
+                      h.Type('button'),
+                      h.Class('later'),
+                      h.OnClick(Message.ClickedDismissUpdate()),
+                    ],
+                    ['Later'],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        Applying: () =>
+          h.div(
+            [h.Class('update-toast')],
+            [h.span([h.Class('update-text')], ['Updating…'])],
+          ),
+      }),
+    ],
+  )
+
+// DOCUMENT
+
+const pageView = (
+  maybeNumber: Option.Option<number>,
+  content: Html,
+  model: Model,
+  h: H,
+): Html =>
+  h.div(
+    [],
+    [
+      h.main([], [headerView(maybeNumber, h), content]),
+      updateToastView(model, h),
+    ],
+  )
+
 export const view = (model: Model, h: H): Document => {
   const today = todayNumber(model.clock.today)
   return AppRoute.match(model.route, {
     Today: () => ({
       title: `Origin No. ${today}`,
-      body: h.main(
-        [],
-        [headerView(Option.some(today), h), dayPageView(today, model, h)],
+      body: pageView(
+        Option.some(today),
+        dayPageView(today, model, h),
+        model,
+        h,
       ),
     }),
     Edition: ({ number }) => ({
       title: `Origin No. ${number}`,
-      body: h.main(
-        [],
-        [
-          headerView(
-            Option.liftPredicate(
-              number,
-              candidate => candidate >= 1 && candidate <= today,
-            ),
-            h,
-          ),
-          dayPageView(number, model, h),
-        ],
+      body: pageView(
+        Option.liftPredicate(
+          number,
+          candidate => candidate >= 1 && candidate <= today,
+        ),
+        dayPageView(number, model, h),
+        model,
+        h,
       ),
     }),
     Archive: () => ({
       title: 'Origin: Archives',
-      body: h.main(
-        [],
-        [headerView(Option.none(), h), archivePageView(model, h)],
-      ),
+      body: pageView(Option.none(), archivePageView(model, h), model, h),
     }),
     NotFound: () => ({
       title: 'Origin',
-      body: h.main([], [headerView(Option.none(), h), notFoundView(h)]),
+      body: pageView(Option.none(), notFoundView(h), model, h),
     }),
   })
 }

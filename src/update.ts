@@ -5,6 +5,7 @@ import { modifyFields } from 'foldkit/struct'
 import { toString as urlToString } from 'foldkit/url'
 
 import {
+  ActivateUpdate,
   FetchArchive,
   FetchFact,
   LoadExternal,
@@ -14,6 +15,7 @@ import {
   ShareResult,
 } from './command'
 import {
+  AppUpdate,
   ArchiveAsyncData,
   type DayProgress,
   FactAsyncData,
@@ -253,6 +255,29 @@ export const update = (model: Model, message: Message) =>
         archive: () => ArchiveAsyncData.Success({ data: archive }),
       }),
     }),
+
+    FoundAppUpdate: () => ({
+      model: modifyFields(model, {
+        appUpdate: current =>
+          AppUpdate.match(current, {
+            Current: () => AppUpdate.Available(),
+            Available: () => current,
+            Dismissed: () => AppUpdate.Available(),
+            Applying: () => current,
+          }),
+      }),
+    }),
+
+    ClickedReloadForUpdate: () => ({
+      model: modifyFields(model, { appUpdate: () => AppUpdate.Applying() }),
+      commands: [ActivateUpdate()],
+    }),
+
+    ClickedDismissUpdate: () => ({
+      model: modifyFields(model, { appUpdate: () => AppUpdate.Dismissed() }),
+    }),
+
+    CompletedActivateUpdate: () => ({ model }),
 
     FailedFetchArchive: ({ error }) => ({
       model: modifyFields(model, {

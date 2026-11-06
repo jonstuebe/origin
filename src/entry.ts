@@ -2,7 +2,6 @@ import { Runtime } from 'foldkit'
 
 import '@fontsource-variable/newsreader/opsz.css'
 import '@fontsource-variable/newsreader/opsz-italic.css'
-import { registerSW } from 'virtual:pwa-register'
 
 import './styles.css'
 import {
@@ -34,5 +33,3 @@ const application = Runtime.makeApplication({
 })
 
 Runtime.run(application, { flags })
-
-registerSW({ immediate: true })

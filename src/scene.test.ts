@@ -11,8 +11,13 @@ import {
 } from 'foldkit/scene'
 import { describe, test } from 'vitest'
 
-import { SaveProgress, ShareResult } from './command'
-import { ArchiveAsyncData, FactAsyncData, FetchError } from './domain'
+import { ActivateUpdate, SaveProgress, ShareResult } from './command'
+import {
+  AppUpdate,
+  ArchiveAsyncData,
+  FactAsyncData,
+  FetchError,
+} from './domain'
 import { Message, update, view } from './main'
 import { archiveOnNov6, fact1, fact2, modelWith } from './main.fixture'
 import { AppRoute } from './route'
@@ -160,4 +165,35 @@ test('share outcome shows a toast', () => {
     ),
     expect(text('Copied')).toExist(),
   )
+})
+
+describe('update toast', () => {
+  test('is hidden until an update is waiting', () => {
+    scene(
+      { update, view },
+      given(modelWith()),
+      expect(role('button', { name: 'Reload' })).toBeAbsent(),
+      expect(text('A new version of Origin is ready.')).toBeAbsent(),
+    )
+  })
+
+  test('offers Reload and Later', () => {
+    scene(
+      { update, view },
+      given(modelWith({ appUpdate: AppUpdate.Available() })),
+      expect(text('A new version of Origin is ready.')).toExist(),
+      click(role('button', { name: 'Later' })),
+      expect(text('A new version of Origin is ready.')).toBeAbsent(),
+    )
+  })
+
+  test('shows progress after Reload', () => {
+    scene(
+      { update, view },
+      given(modelWith({ appUpdate: AppUpdate.Available() })),
+      click(role('button', { name: 'Reload' })),
+      expect(text('Updating…')).toExist(),
+      Command.resolve(ActivateUpdate, Message.CompletedActivateUpdate()),
+    )
+  })
 })

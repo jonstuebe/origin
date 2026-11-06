@@ -8,6 +8,7 @@ Live at **https://origin.jonstuebe.com**.
 - A small Cloudflare Worker serves facts one at a time and refuses any edition whose date hasn't started somewhere on Earth, so future facts can't be read from the page or the API (see [ADR 0001](docs/adr/0001-facts-served-by-worker.md)).
 - The client is a [Foldkit](https://foldkit.dev) app (Effect + The Elm Architecture). Reveals, verdicts and streaks live in `localStorage` under `origin:v1`.
 - Installable PWA. API responses are cached network-first, so anything already read stays readable offline.
+- After a deploy, open pages show a toast (“A new version of Origin is ready. Reload · Later”). The new version only takes over when the reader taps Reload, so a page never reloads on its own (`src/serviceWorker.ts`).
 
 ## Develop
 
@@ -74,7 +75,8 @@ src/                 Foldkit app
   message.ts         Messages
   update.ts          update + route loading
   command.ts         fetch, save, share, navigation Commands
-  subscription.ts    one-second clock tick (countdown + midnight rollover)
+  subscription.ts    one-second clock tick (countdown + midnight rollover), update detection
+  serviceWorker.ts   registers the service worker; activates a waiting update on Reload
   view.ts            pages: today, past edition, archives
   domain.ts          Fact/Archive/Progress schemas, streak and tallies
   route.ts           /, /archive, /no/:number
