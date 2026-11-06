@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dev-dist/
+.wrangler/
+*.tsbuildinfo
+test-results/
+playwright-report/
+.env
+.env.*
+.dev.vars
+.DS_Store
+.claude/worktrees/
